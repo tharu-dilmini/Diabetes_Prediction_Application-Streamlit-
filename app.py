@@ -97,26 +97,45 @@ elif page == 'Data Explorer':
 # Visualizations
 # --------------------
 elif page == 'Visualizations':
-    st.header('Visualisations')
+    st.header('Visualizations')
 
-    st.subheader('Histogram')
+    st.subheader('Animated Histogram')
     numeric_cols = df.select_dtypes(include=np.number).columns.tolist()
-    col = st.selectbox('Choose numeric column', numeric_cols)
-    fig = px.histogram(df, x=col, nbins=30, title=f'Histogram of {col}')
-    st.plotly_chart(fig, use_container_width=True)
+    col_hist = st.selectbox('Choose numeric column for histogram', numeric_cols, key='hist_col')
+    fig_hist = px.histogram(df, x=col_hist, nbins=30, title=f'Histogram of {col_hist}', 
+                            animation_frame='Outcome', color='Outcome')
+    st.plotly_chart(fig_hist, use_container_width=True)
 
-    st.subheader('Correlation heatmap')
+    st.subheader('Correlation Heatmap')
     if st.button('Show correlation heatmap'):
         corr = df.corr()
         fig, ax = plt.subplots(figsize=(8, 6))
         sns.heatmap(corr, annot=True, fmt='.2f', cmap='coolwarm', ax=ax)
         st.pyplot(fig)
 
-    st.subheader('Scatter plot')
-    x_axis = st.selectbox('X axis', numeric_cols, index=0)
-    y_axis = st.selectbox('Y axis', numeric_cols, index=1)
-    fig2 = px.scatter(df, x=x_axis, y=y_axis, color='Outcome', title=f'{y_axis} vs {x_axis}')
-    st.plotly_chart(fig2, use_container_width=True)
+    st.subheader('Animated Scatter Plot')
+    x_axis = st.selectbox('X axis for scatter', numeric_cols, index=0, key='scatter_x')
+    y_axis = st.selectbox('Y axis for scatter', numeric_cols, index=1, key='scatter_y')
+    fig_scatter = px.scatter(df, x=x_axis, y=y_axis, color='Outcome', 
+                            title=f'{y_axis} vs {x_axis}', animation_frame='Age',
+                            hover_data=['Pregnancies', 'Glucose'])
+    st.plotly_chart(fig_scatter, use_container_width=True)
+
+    st.subheader('Animated Box Plot')
+    col_box = st.selectbox('Choose numeric column for box plot', numeric_cols, key='box_col')
+    # Bin Age into groups for animation
+    df['AgeGroup'] = pd.cut(df['Age'], bins=5, labels=['Young', 'Young Adult', 'Adult', 'Middle Aged', 'Senior'])
+    fig_box = px.box(df, x='AgeGroup', y=col_box, color='Outcome', 
+                     title=f'Box Plot of {col_box} by Age Group', animation_frame='AgeGroup')
+    st.plotly_chart(fig_box, use_container_width=True)
+
+    st.subheader('Animated Line Plot')
+    col_line = st.selectbox('Choose numeric column for line plot', numeric_cols, key='line_col')
+    # Aggregate data by Age and Outcome
+    line_data = df.groupby(['Age', 'Outcome'])[col_line].mean().reset_index()
+    fig_line = px.line(line_data, x='Age', y=col_line, color='Outcome', 
+                       title=f'Trend of {col_line} over Age', animation_frame='Outcome')
+    st.plotly_chart(fig_line, use_container_width=True)
 
 # --------------------
 # Model Prediction
@@ -157,24 +176,4 @@ elif page == 'Model Performance':
 
     data = df.copy()
     cols_with_zero = ['Glucose', 'BloodPressure', 'SkinThickness', 'Insulin', 'BMI']
-    for c in cols_with_zero:
-        data[c] = data[c].replace(0, np.nan)
-    data[cols_with_zero] = data[cols_with_zero].fillna(data[cols_with_zero].median())
-
-    X = data.drop('Outcome', axis=1)
-    y = data['Outcome']
-    X_train, X_test, y_train, y_test = train_test_split(X, y, stratify=y, test_size=0.2, random_state=42)
-    X_test_scaled = scaler.transform(X_test)
-
-    preds = model.predict(X_test_scaled)
-    acc = accuracy_score(y_test, preds)
-
-    st.write('Accuracy:', acc)
-    cm = confusion_matrix(y_test, preds)
-    fig, ax = plt.subplots()
-    sns.heatmap(cm, annot=True, fmt='d', ax=ax)
-    ax.set_xlabel('Predicted')
-    ax.set_ylabel('Actual')
-    st.pyplot(fig)
-
-    st.text(classification_report(y_test, preds))
+    for c
