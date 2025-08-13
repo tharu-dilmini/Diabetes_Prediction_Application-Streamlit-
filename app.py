@@ -176,4 +176,24 @@ elif page == 'Model Performance':
 
     data = df.copy()
     cols_with_zero = ['Glucose', 'BloodPressure', 'SkinThickness', 'Insulin', 'BMI']
-    for c
+    for c in cols_with_zero:
+        data[c] = data[c].replace(0, np.nan)
+    data[cols_with_zero] = data[cols_with_zero].fillna(data[cols_with_zero].median())
+
+    X = data.drop('Outcome', axis=1)
+    y = data['Outcome']
+    X_train, X_test, y_train, y_test = train_test_split(X, y, stratify=y, test_size=0.2, random_state=42)
+    X_test_scaled = scaler.transform(X_test)
+
+    preds = model.predict(X_test_scaled)
+    acc = accuracy_score(y_test, preds)
+
+    st.write('Accuracy:', acc)
+    cm = confusion_matrix(y_test, preds)
+    fig, ax = plt.subplots()
+    sns.heatmap(cm, annot=True, fmt='d', ax=ax)
+    ax.set_xlabel('Predicted')
+    ax.set_ylabel('Actual')
+    st.pyplot(fig)
+
+    st.text(classification_report(y_test, preds))
