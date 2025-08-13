@@ -65,10 +65,26 @@ if page == 'Home':
     st.markdown('**Dataset:** Pima Indians Diabetes')
     st.write('---')
 
-    col1, col2, col3 = st.columns(3)
+    # Additional metrics
+    col1, col2, col3, col4, col5 = st.columns(5)
     col1.metric('Rows', df.shape[0])
     col2.metric('Columns', df.shape[1])
     col3.metric('Positive Cases', int(df['Outcome'].sum()))
+    col4.metric('Average Age', round(df['Age'].mean(), 1))
+    col5.metric('Average BMI', round(df['BMI'].mean(), 1))
+
+    # Bar chart for Outcome distribution
+    outcome_counts = df['Outcome'].value_counts()
+    fig = px.bar(x=['Non-Diabetic', 'Diabetic'], y=outcome_counts.values,
+                 title='Distribution of Diabetes Outcomes',
+                 color=['Non-Diabetic', 'Diabetic'],
+                 color_discrete_sequence=['#1f77b4', '#ff7f0e'])
+    st.plotly_chart(fig, use_container_width=True)
+
+    # Interactive dataset info
+    st.subheader('Dataset Overview')
+    if st.checkbox('Show dataset summary'):
+        st.write(df.describe())
 
 # --------------------
 # Data Explorer
@@ -99,43 +115,24 @@ elif page == 'Data Explorer':
 elif page == 'Visualizations':
     st.header('Visualizations')
 
-    st.subheader('Animated Histogram')
+    st.subheader('Histogram')
     numeric_cols = df.select_dtypes(include=np.number).columns.tolist()
-    col_hist = st.selectbox('Choose numeric column for histogram', numeric_cols, key='hist_col')
-    fig_hist = px.histogram(df, x=col_hist, nbins=30, title=f'Histogram of {col_hist}', 
-                            animation_frame='Outcome', color='Outcome')
-    st.plotly_chart(fig_hist, use_container_width=True)
+    col = st.selectbox('Choose numeric column', numeric_cols)
+    fig = px.histogram(df, x=col, nbins=30, title=f'Histogram of {col}')
+    st.plotly_chart(fig, use_container_width=True)
 
-    st.subheader('Correlation Heatmap')
+    st.subheader('Correlation heatmap')
     if st.button('Show correlation heatmap'):
         corr = df.corr()
         fig, ax = plt.subplots(figsize=(8, 6))
         sns.heatmap(corr, annot=True, fmt='.2f', cmap='coolwarm', ax=ax)
         st.pyplot(fig)
 
-    st.subheader('Animated Scatter Plot')
-    x_axis = st.selectbox('X axis for scatter', numeric_cols, index=0, key='scatter_x')
-    y_axis = st.selectbox('Y axis for scatter', numeric_cols, index=1, key='scatter_y')
-    fig_scatter = px.scatter(df, x=x_axis, y=y_axis, color='Outcome', 
-                            title=f'{y_axis} vs {x_axis}', animation_frame='Age',
-                            hover_data=['Pregnancies', 'Glucose'])
-    st.plotly_chart(fig_scatter, use_container_width=True)
-
-    st.subheader('Animated Box Plot')
-    col_box = st.selectbox('Choose numeric column for box plot', numeric_cols, key='box_col')
-    # Bin Age into groups for animation
-    df['AgeGroup'] = pd.cut(df['Age'], bins=5, labels=['Young', 'Young Adult', 'Adult', 'Middle Aged', 'Senior'])
-    fig_box = px.box(df, x='AgeGroup', y=col_box, color='Outcome', 
-                     title=f'Box Plot of {col_box} by Age Group', animation_frame='AgeGroup')
-    st.plotly_chart(fig_box, use_container_width=True)
-
-    st.subheader('Animated Line Plot')
-    col_line = st.selectbox('Choose numeric column for line plot', numeric_cols, key='line_col')
-    # Aggregate data by Age and Outcome
-    line_data = df.groupby(['Age', 'Outcome'])[col_line].mean().reset_index()
-    fig_line = px.line(line_data, x='Age', y=col_line, color='Outcome', 
-                       title=f'Trend of {col_line} over Age', animation_frame='Outcome')
-    st.plotly_chart(fig_line, use_container_width=True)
+    st.subheader('Scatter plot')
+    x_axis = st.selectbox('X axis', numeric_cols, index=0)
+    y_axis = st.selectbox('Y axis', numeric_cols, index=1)
+    fig2 = px.scatter(df, x=x_axis, y=y_axis, color='Outcome', title=f'{y_axis} vs {x_axis}')
+    st.plotly_chart(fig2, use_container_width=True)
 
 # --------------------
 # Model Prediction
