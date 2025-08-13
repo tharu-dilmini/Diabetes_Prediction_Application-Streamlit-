@@ -116,5 +116,5 @@ This project is for educational purposes.
 
 ✍️ Details
 
-NameEmail: tharukadilmini22@gmail.com
+Name: W.M.T.Dilmini
 GitHub: https://github.com/tharu-dilmini/Diabetes_Prediction_Application
