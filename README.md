@@ -16,15 +16,21 @@ Model performance metrics with confusion matrix and classification report
 Fully deployable to Streamlit Cloud
 
 your-project/
+
 app.py                   # Streamlit web app
+
 model_training.py        # Model training and saving script
+
 model.pkl                # Trained ML model
+
 scaler.pkl               # Fitted StandardScaler
+
 requirements.txt         # Python dependencies
 data/
    └── diabetes.csv         # Dataset
 notebooks/
    └── model_training_notebook.ipynb  # (Optional) EDA & training in Jupyter
+   
 README.md                # Documentation
 
 📌Dataset
@@ -117,4 +123,5 @@ This project is for educational purposes.
 ✍️ Details
 
 Name: W.M.T.Dilmini
+
 GitHub: https://github.com/tharu-dilmini/Diabetes_Prediction_Application
